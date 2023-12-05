@@ -146,6 +146,20 @@ class Beam:
         screen.blit(self.img, self.rct)
 
 
+class Explosion:
+    def __init__(self, bomb: Bomb):
+        img = pg.transform.rotozoom(pg.image.load(f"{MAIN_DIR}/fig/explosion.gif"), 0, 2.0)
+        self.imgs = [img, pg.transform.flip(img, True, True)]
+        self.img = self.imgs[0]
+        self.rct = self.img.get_rect()
+        self.rct.center = bomb.rct.center
+        self.life = 10
+
+    def update(self, screen: pg.Surface):
+        self.life -= 1
+        screen.blit(self.imgs[self.life%2], self.rct)
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
@@ -154,6 +168,7 @@ def main():
     # BombインスタンスがNUM個並んだリスト
     bombs = [Bomb() for _ in range(NUM_OF_BOMBS)]  
     beam = None
+    explosions = []
 
     clock = pg.time.Clock()
     tmr = 0
@@ -176,9 +191,12 @@ def main():
 
         for i, bomb in enumerate(bombs):
             if beam is not None and beam.rct.colliderect(bomb.rct):
+                explosion = Explosion(bombs[i])
+                explosions.append(explosion)
                 beam = None
                 bombs[i] = None
                 bird.change_img(6, screen)
+
         # Noneでない爆弾だけのリストを作る
         bombs = [bomb for bomb in bombs if bomb is not None]
 
@@ -188,6 +206,11 @@ def main():
             bomb.update(screen)
         if beam is not None:
             beam.update(screen)
+        for i, explosion in enumerate(explosions):
+            if explosion is not None:
+                if explosion.life <= 0:
+                    explosions[i] = None
+                explosion.update(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
