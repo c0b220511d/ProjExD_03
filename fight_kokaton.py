@@ -206,6 +206,7 @@ def main():
             bomb.update(screen)
         if beam is not None:
             beam.update(screen)
+            
         for i, explosion in enumerate(explosions):
             if explosion is not None:
                 if explosion.life <= 0:
